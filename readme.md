@@ -1,4 +1,4 @@
-## leetcode Crawler
+## Leetcode Crawler
 
 用 Golang 编写的 Leetcode 题目爬取工具，可以爬取题目并按文件夹保存，方便整理自己的解题记录。
 
@@ -16,7 +16,7 @@
 ```
 go install github.com/Deardrops/leetcodeCrawler
 ```
-你也可以从 [release 页面]() 下载对应平台的二进制文件，并手动添加到环境变量 `PATH` 中。
+你也可以从 [release 页面](https://github.com/Deardrops/leetcodeCrawler/releases) 下载对应平台的二进制文件，并手动添加到环境变量 `PATH` 中。
 
 ### 2. 运行
 
