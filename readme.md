@@ -13,7 +13,8 @@
 ### 1. 下载
 
 如果本地已经安装 golang 环境，可以通过以下命令安装
-```
+```bash
+go get github.com/Deardrops/leetcodeCrawler
 go install github.com/Deardrops/leetcodeCrawler
 ```
 你也可以从 [release 页面](https://github.com/Deardrops/leetcodeCrawler/releases) 下载对应平台的二进制文件，并手动添加到环境变量 `PATH` 中。
