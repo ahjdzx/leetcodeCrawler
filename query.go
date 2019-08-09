@@ -48,6 +48,7 @@ type Question struct {
 	CodeDefinition    string
 	Content           string
 	TranslatedContent string
+	TitleSlug         string `json:"-"`
 }
 
 func getQuestion(titleSlug string) *Question {
@@ -62,6 +63,7 @@ func getQuestion(titleSlug string) *Question {
 	if err != nil {
 		log.Fatal(err)
 	}
+	wrapper.Data.Question.TitleSlug = titleSlug
 	return &wrapper.Data.Question
 }
 
@@ -112,7 +114,50 @@ func postRequestWith(requestBody string) *json.Decoder {
 	bodyReader := strings.NewReader(requestBody)
 	resp, err := http.Post(ApiUrl, ContentType, bodyReader)
 	if err != nil {
-		fmt.Printf("error when query: %T:%v\n", err, err)
+		log.Printf("error when query: %T:%v\n", err, err)
 	}
 	return json.NewDecoder(resp.Body)
+}
+
+func getAllProblems() *AllProblems {
+	endpoint := "https://leetcode-cn.com/api/problems/all/"
+	resp, err := http.Get(endpoint)
+	if err != nil {
+		log.Printf("error: %T:%v\n", err)
+		return nil
+	}
+	defer resp.Body.Close()
+
+	decoder := json.NewDecoder(resp.Body)
+	allProblems := AllProblems{}
+	if err = decoder.Decode(&allProblems); err != nil {
+		log.Printf("error: %T:%v\n", err)
+		return nil
+	}
+	return &allProblems
+}
+
+type AllProblems struct {
+	StatStatusPairs StatusPairs `json:"stat_status_pairs"`
+}
+
+type StatStatusPair struct {
+	Stat struct {
+		QuestionID        int    `json:"question_id"`
+		QuestionTitleSlug string `json:"question__title_slug"`
+	} `json:"stat"`
+}
+
+type StatusPairs []StatStatusPair
+
+func (s StatusPairs) Len() int {
+	return len(s)
+}
+
+func (s StatusPairs) Less(i, j int) bool {
+	return s[i].Stat.QuestionID < s[j].Stat.QuestionID
+}
+
+func (s StatusPairs) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
 }

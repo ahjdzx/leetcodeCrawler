@@ -9,12 +9,11 @@ func buildProblem(id, basePath string) {
 	item := getItem(id)
 	titleSlug := item.Question.TitleSlug
 	question := getQuestion(titleSlug)
-	err := createQuestion(basePath, item, question)
+	err := createQuestion(basePath, question)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Printf("create problem <%s> successfully!\n", question.QuestionTitle)
 }
 
 func buildAllProblems() {
@@ -34,7 +33,7 @@ func buildAllProblems() {
 		card := getCard(cardSlug)
 		for _, c := range card.Chapters {
 			chapter := getChapter(c.Id, cardSlug)
-			chapterFolder := path.Join(cardFolder +"/"+ chapter.Slug)
+			chapterFolder := path.Join(cardFolder + "/" + chapter.Slug)
 			err := createFolder(chapterFolder)
 			if err != nil {
 				fmt.Println(err)

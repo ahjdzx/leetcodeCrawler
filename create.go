@@ -4,16 +4,21 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path"
+	"strconv"
 )
 
 const problemBaseCN = "https://leetcode-cn.com/problems/"
 const problemBase = "https://leetcode.com/problems/"
 
-func createQuestion(basePath string, item *Item, question *Question) error {
-	titleSlug := item.Question.TitleSlug
-	folder := path.Join(basePath, titleSlug)
+func createQuestion(basePath string, question *Question) error {
+	qid, _ := strconv.Atoi(question.QuestionId)
+	titleSlug := question.TitleSlug
+
+	name := fmt.Sprintf("%04d_%s", qid, titleSlug)
+	folder := path.Join(basePath, name)
 	err := createFolder(folder)
 	if err != nil {
 		return err
@@ -23,10 +28,11 @@ func createQuestion(basePath string, item *Item, question *Question) error {
 	if err != nil {
 		return err
 	}
-	err = createReadmeFile(folder, item.Title, titleSlug, question.TranslatedContent)
+	err = createReadmeFile(folder, question.QuestionTitle, titleSlug, question.TranslatedContent)
 	if err != nil {
 		return err
 	}
+	log.Printf("create problem <%s> successfully!\n", name)
 	return nil
 }
 
@@ -34,7 +40,7 @@ func createFolder(folder string) error {
 	err := os.Mkdir(folder, os.ModePerm)
 	if err != nil {
 		if os.IsExist(err) {
-			fmt.Println("folder existed: ", folder)
+			log.Println("folder existed: ", folder)
 			return err
 		}
 	}
@@ -67,7 +73,7 @@ func createReadmeFile(folder, title, titleSlug, content string) error {
 	fmt.Fprintln(w)
 	fmt.Fprint(w, content)
 	fmt.Fprintln(w)
-	fmt.Fprintln(w,"-----")
+	fmt.Fprintln(w, "-----")
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "### 链接：")
 	fmt.Fprintln(w)
@@ -82,7 +88,8 @@ func parseDefaultCode(codeDeinition string) string {
 	bytes := []byte(codeDeinition)
 	err := json.Unmarshal(bytes, &CodeDefinitions)
 	if err != nil {
-		fmt.Println("Failed to parse code definition json: ", err)
+		log.Println("Failed to parse code definition json: ", err)
+		log.Println(codeDeinition)
 		return ""
 	}
 	for _, item := range CodeDefinitions {
