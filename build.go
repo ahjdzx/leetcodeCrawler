@@ -8,7 +8,7 @@ import (
 func buildProblem(id, basePath string) {
 	item := getItem(id)
 	titleSlug := item.Question.TitleSlug
-	question := getQuestion(titleSlug)
+	question := getQuestionData(titleSlug)
 	err := createQuestion(basePath, question)
 	if err != nil {
 		fmt.Println(err)

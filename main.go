@@ -29,8 +29,8 @@ func main() {
 		sort.Sort(allProblems.StatStatusPairs)
 
 		for _, pair := range allProblems.StatStatusPairs {
-			question := getQuestion(pair.Stat.QuestionTitleSlug)
-			if question.CodeDefinition == "" {
+			question := getQuestionData(pair.Stat.QuestionTitleSlug)
+			if question.IsPaidOnly {
 				continue
 			}
 			if err := createQuestion(basePath, question); err != nil {

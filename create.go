@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -23,12 +22,12 @@ func createQuestion(basePath string, question *Question) error {
 	if err != nil {
 		return err
 	}
-	defaultCode := parseDefaultCode(question.CodeDefinition)
+	defaultCode := parseDefaultCode(question.CodeSnippets)
 	err = createSolutionFile(folder, defaultCode)
 	if err != nil {
 		return err
 	}
-	err = createReadmeFile(folder, question.QuestionTitle, titleSlug, question.TranslatedContent)
+	err = createReadmeFile(folder, question)
 	if err != nil {
 		return err
 	}
@@ -55,46 +54,54 @@ func createSolutionFile(folder, defaultCode string) error {
 	}
 	defer f.Close()
 	w := bufio.NewWriter(f)
-	fmt.Fprintln(w, "package main")
+	fmt.Fprintln(w, "package leetcode")
 	fmt.Fprintln(w)
 	fmt.Fprint(w, defaultCode)
 	return w.Flush()
 }
 
-func createReadmeFile(folder, title, titleSlug, content string) error {
-	readmePath := path.Join(folder, "readme.md")
+func createReadmeFile(folder string, question *Question) error {
+	readmePath := path.Join(folder, "README.md")
 	f, err := os.Create(readmePath)
 	if err != nil {
 		return fmt.Errorf("failed to create file: %s\n", readmePath)
 	}
 	defer f.Close()
 	w := bufio.NewWriter(f)
-	fmt.Fprintln(w, "## "+title)
+	fmt.Fprintln(w, "# "+question.Title)
 	fmt.Fprintln(w)
-	fmt.Fprint(w, content)
+	fmt.Fprintln(w, question.TranslatedTitle)
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "**"+question.Difficulty+"**")
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "## 问题描述")
+	fmt.Fprintln(w)
+	fmt.Fprint(w, question.TranslatedContent)
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "## 相关标签")
+	fmt.Fprintln(w)
+	for _, topicTag := range question.TopicTags {
+		fmt.Fprintln(w, "* "+topicTag.TranslatedName)
+	}
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "## 测试用例")
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, question.SampleTestCase)
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "-----")
 	fmt.Fprintln(w)
-	fmt.Fprintln(w, "### 链接：")
+	fmt.Fprintln(w, "## 链接")
 	fmt.Fprintln(w)
-	fmt.Fprintln(w, "中文："+problemBaseCN+titleSlug)
+	fmt.Fprintln(w, "中文："+problemBaseCN+question.TitleSlug)
 	fmt.Fprintln(w)
-	fmt.Fprintln(w, "英文："+problemBase+titleSlug)
+	fmt.Fprintln(w, "英文："+problemBase+question.TitleSlug)
 	return w.Flush()
 }
 
-func parseDefaultCode(codeDeinition string) string {
-	var CodeDefinitions []CodeDefinition
-	bytes := []byte(codeDeinition)
-	err := json.Unmarshal(bytes, &CodeDefinitions)
-	if err != nil {
-		log.Println("Failed to parse code definition json: ", err)
-		log.Println(codeDeinition)
-		return ""
-	}
-	for _, item := range CodeDefinitions {
-		if item.Value == "golang" {
-			return item.DefaultCode
+func parseDefaultCode(codeSnippets []CodeSnippet) string {
+	for _, item := range codeSnippets {
+		if item.Lang == "Go" {
+			return item.Code
 		}
 	}
 	return ""
